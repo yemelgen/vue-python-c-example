@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MyKeygen v0.1</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="./favicon.ico" rel="shortcut icon" type="image/x-icon" />
+	<link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.10/vuetify.css" rel="stylesheet" type="text/css" />
+	<script src="./lib/js/es6check.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.10/vue.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/3.6.5/vue-router.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-i18n/8.27.2/vue-i18n.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.6.2/vuex.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.10/vuetify.min.js"></script>
+</head>
+<body>
+	<noscript>You need to enable JavaScript to run this app.</noscript>
+	<!-- ROOT -->
+	<div id="root"></div>
+	<!-- frame -->
+	<template id="frame">
+		<v-form v-model="valid" ref="form" :disabled="$store.state.keys.loading">
+		<v-row>
+			<v-col cols="6">
+				<v-text-field outlined
+					v-model="version"
+					label="Product version"
+					placeholder="8101"
+					:rules="[rules.required, rules.number, rules.code]"
+				></v-text-field>
+			</v-col>
+			<v-col cols="6">
+				<v-text-field outlined
+					v-model="code"
+					placeholder="414E51A3"
+					label="Product code"
+					:rules="[rules.required, rules.hexnumber, rules.version]"
+				></v-text-field>
+			</v-col>
+			<v-col cols="6">
+				<v-text-field outlined
+					v-model="db"
+					label="Database code"
+					placeholder="W648"
+					:rules="[rules.required]"
+				></v-text-field>
+			</v-col>
+			<v-col cols="6">
+				<v-menu v-model="picker"
+					:disabled="noExpDate"
+					:close-on-content-click="false"
+					>
+					<template v-slot:activator="{ on, attrs }">
+						<v-text-field outlined
+							label="Expiration date"
+							:disabled="noExpDate"
+							:value="expDate"
+							v-on="on"
+							v-bind="attrs"
+							readonly
+							hide-details
+						>
+							<template v-slot:append>
+								<v-icon v-on="on" v-bind="attrs">today</v-icon>
+							</template>
+						</v-text-field>
+					</template>
+					<v-date-picker
+						v-model="expDate"
+						@input="picker = false"
+					></v-date-picker>
+				</v-menu>
+				<v-checkbox
+					v-model="noExpDate"
+					label="No expiration date"
+					hide-details
+				></v-checkbox>
+			</v-col>
+			<v-col cols="4">
+				<v-text-field outlined
+					v-model="workplaces"
+					label="Workplaces"
+					type="number"
+					min="0"
+					step="any"
+					placeholder="200"
+					:rules="[rules.number]"
+					></v-text-field>
+			</v-col>
+			<v-col cols="8">
+				<v-select outlined
+					v-model="selectedOptions"
+					label="Product options"
+					:items="options"
+					:rules="[rules.options]"
+					item-value="id"
+					item-text="label"
+					no-data-text="No options available"
+					multiple
+				>
+					<template v-slot:prepend-item>
+						<v-list-item ripple @click="selectAll">
+							<v-list-item-action>
+								<v-icon>{{ selectIcon }}</v-icon>
+							</v-list-item-action>
+							<v-list-item-content>
+								<v-list-item-title>Select All</v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
+						<v-divider class="mb-2"></v-divider>
+					</template>
+					<template v-slot:selection="{ item, index }">
+						<span v-if="index === 0">
+							{{ selectedOptions.length }} option(s) selected
+						</span>
+					</template>
+				</v-select>
+			</v-col>
+		</v-row>
+		<v-row>
+			<v-col cols="12" class="text-right">
+				<v-btn dark @click="reset">Reset</v-btn>
+				<v-btn dark color="primary"
+					:loading="$store.state.keys.loading"
+					:disabled="!valid"
+					@click="create"
+					>Generate</v-btn>
+			</v-col>
+		</v-row>
+		<v-row no-gutters>
+			<v-col cols="12" class="ma-1">
+				<v-textarea outlined
+					hide-details
+					readonly
+					v-model="output"
+					></v-textarea>
+			</v-col>
+			<v-col cols="8" class="text-left pa-1">
+				<span v-if="$store.state.keys.data.item">Have a nice day!</span>
+			</v-col>
+			<v-col cols="4" class="text-right pa-1">
+				<v-btn dark small @click="copy">Copy</v-btn>
+			</v-col>
+		</v-row>
+		</v-form>
+	</template>
+	<script src="./src/frame.js"></script>
+	<!-- app -->
+	<template id="app">
+		<v-app>
+		<v-main class="align-sm-center">
+		<v-container>
+		<v-row align="center" justify="center">
+		<v-card outlined max-width="500" 
+			:loading="$store.state.menu.loading" 
+			:disabled="$store.state.menu.loading">
+			<v-app-bar flat color="grey darken-3">
+				<v-avatar tile><v-img src="./favicon.png"></v-img></v-avatar>
+				<v-card-title>MyKeyGen v0.1</v-card-title>
+				<v-spacer></v-spacer>
+				<v-btn icon><v-icon>close</v-icon></v-btn>
+			</v-app-bar>
+			<v-card-text class="text-center">
+				<router-view></router-view>
+			</v-card-text>
+		</v-card>
+		</v-row>
+		<v-snackbar v-model="snackbar.shown" :color="snackbar.color" >
+			{{ snackbar.text }}
+			<template v-slot:action="{ attrs }">
+				<v-btn dark text
+					v-bind="attrs"
+					@click="snackbar.shown = false"
+				>{{ $t('close') }}</v-btn>
+			</template>
+		</v-snackbar>
+		</v-container>
+		</v-main>
+		</v-app>
+	</template>
+	<link href="./src/app.css" rel="stylesheet" />
+	<script src="./src/providers.js"></script>
+	<script src="./src/app.js"></script>
+</body>
+</html>

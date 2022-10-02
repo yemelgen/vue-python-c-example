@@ -1,0 +1,4 @@
+html { overflow-y: auto  }
+
+tr.v-data-table__selected { background: pink !important; }
+

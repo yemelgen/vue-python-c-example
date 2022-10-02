@@ -1,0 +1,21 @@
+CC = gcc
+STRIP = strip
+CFLAGS = -Wall
+LDFLAGS =
+
+.PHONY: clean build
+
+all: clean build
+
+keygen.x64: keygen.c main.c
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(STRIP) --strip-debug --strip-unneeded $@
+
+libsecret.x64.so: keygen.c
+	$(CC) -shared -fpic $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(STRIP) --strip-debug --strip-unneeded $@
+
+build: keygen.x64 libsecret.x64.so
+
+clean:
+	rm -f keygen.x64 libsecret.x64.so
