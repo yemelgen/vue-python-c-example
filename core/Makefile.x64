@@ -9,11 +9,11 @@ all: clean build
 
 keygen.x64: keygen.c main.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
-	$(STRIP) --strip-debug --strip-unneeded $@
+	$(STRIP) -S $@
 
 libsecret.x64.so: keygen.c
 	$(CC) -shared -fpic $(CFLAGS) $^ -o $@ $(LDFLAGS)
-	$(STRIP) --strip-debug --strip-unneeded $@
+	$(STRIP) -S $@
 
 build: keygen.x64 libsecret.x64.so
 

@@ -38,7 +38,7 @@ const struct myoption myoptions[] = {
 };
 
 static int
-encrypt( unsigned char *dst, size_t maxsize,
+myencrypt( unsigned char *dst, size_t maxsize,
 		unsigned char *src, size_t size )
 {
 	int i, j;
@@ -313,7 +313,7 @@ int mykey_generate( struct mykey *key, char *dst, size_t maxsize )
 	dst[0] = '\0';
 	z = p - buf;
 
-	encrypt( enc , z, buf, z );
+	myencrypt( enc , z, buf, z );
 
 	for ( i = 0; i < z; i++ ) {
 		sprintf( xstr, "%02X", enc[i] );

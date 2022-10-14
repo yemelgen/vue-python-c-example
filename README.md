@@ -10,7 +10,7 @@ First, you need to set up python environment. Make sure that you use Python 3.6 
 ```console
 python3 -m venv venv
 source venv/bin/activate
-pip install -r backend/requirenments.txt
+pip install -r backend/requirements.txt
 ```
 
 Then, build binaries:
