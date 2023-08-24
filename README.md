@@ -1,6 +1,6 @@
 # vue-python-c-example
 
-Intruduction
+Introduction
 ------------
 This is simple solution that shows how to use binary code in your web applications. You can use it as a template or just as an idea in your projects.
 
